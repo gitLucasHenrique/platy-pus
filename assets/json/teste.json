@@ -1,0 +1,24 @@
+{
+    "animes":[
+        {
+            "name" : "anime-01",
+            "img" : "img-url1",
+            "diaSemana" : "dia1"
+        },
+        {
+            "name" : "anime-02",
+            "img" : "img-url2",
+            "diaSemana" : "dia2"
+        },
+        {
+            "name" : "anime-03",
+            "img" : "img-url3",
+            "diaSemana" : "dia3"
+        },
+        {
+            "name" : "anime-04",
+            "img" : "img-url4",
+            "diaSemana" : "dia4"
+        }
+    ]
+}

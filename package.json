@@ -1,0 +1,23 @@
+{
+  "name": "platy-pus",
+  "version": "1.0.0",
+  "description": "platy-pus site",
+  "main": "index.js",
+  "scripts": {
+    "test": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitLucasHenrique/platy-pus.git"
+  },
+  "keywords": [
+    "platy-pus",
+    "application"
+  ],
+  "author": "lucas henrique ronqui de souza",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gitLucasHenrique/platy-pus/issues"
+  },
+  "homepage": "https://github.com/gitLucasHenrique/platy-pus#readme"
+}
