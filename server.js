@@ -21,4 +21,4 @@ const server = http.createServer(function(req,res){
     }
 });
 
-server.listen(443,"https://platy-pus.herokuapp.com/");
+server.listen(443);
