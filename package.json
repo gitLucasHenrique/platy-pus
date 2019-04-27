@@ -4,7 +4,7 @@
   "description": "platy-pus site",
   "main": "index.js",
   "scripts": {
-    "test": "node server.js",
+    "test": "nothing set to test",
     "start": "node server.js"
   },
   "repository": {
