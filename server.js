@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const jsonFile = require('./assets/json/teste');
+const Pro
 
 const server = http.createServer(function(req,res){
     console.log('requested' + req.url);
@@ -8,7 +9,7 @@ const server = http.createServer(function(req,res){
         res.writeHead(200, {'Content-Type': 'text/html'});
         fs.createReadStream(__dirname + '/index.html').pipe(res);
     }if(req.url === '/api/animeList'){
-        if(req.headers['platypus'] === 'pwd-platypus'){
+        if(req.headers[process.env.HEADER] === process.env.HEADER_VALUE){
             res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(JSON.stringify(jsonFile));
         }else{
