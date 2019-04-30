@@ -1,4 +1,5 @@
 const teste = require('axios');
+const cheerio = require('cheerio');
 
 //const URL = 'https://things.ubidots.com/api/v1.6/devices/Alarme1/gas1';
 //const URL = 'https://things.ubidots.com/api/v1.6/variables/5cba9ee859163624a9572a64/values';
@@ -6,10 +7,32 @@ const teste = require('axios');
 //
 const URL = 'https://www.animestc.com/'
 
-teste.get(URL)
+
+teste.get(URL, {
+    headers: { 'platypus': 'pwd-platypus' }
+})
     .then(function (response){
-    return response.data;
+        workData(response.data);
     })
     .catch(function (error){
-    return error
+        console.log(error);
 });
+
+
+function workData(data){
+    const $ = cheerio.load(data);
+    $('.atualizacoes-content').each((i, el) => {
+        const animeTitle = $(el)
+        .find('.transmissao-container')
+        .find('.anime-transmissao-container')
+        .find('.anime-transmissao-nome')
+        .text()
+        
+        const animeImage = $(el)
+        .find('.transmissao-container')
+        .find('.anime-transmissao-container')
+        .find('img')
+        .attr('src');
+        console.log(i, animeTitle, animeImage);
+    });
+}
