@@ -1,6 +1,6 @@
 const http = require('http');
 const fs = require('fs');
-const jsonFile = require('./assets/json/teste');
+const jsonFile = require('./assets/json/animeList');
 
 const server = http.createServer(function(req,res){
     console.log('requested' + req.url);
