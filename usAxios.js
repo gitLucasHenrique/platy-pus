@@ -30,9 +30,7 @@ function workData(data){
         
         const animeImage = $(el)
         .find('.transmissao-container')
-        .find('.anime-transmissao-container')
-        .find('img')
-        .attr('src');
+        .find('.anime-transmissao-container').text();
         console.log(i, animeTitle, animeImage);
     });
 }
