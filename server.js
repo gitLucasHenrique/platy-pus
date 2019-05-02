@@ -7,6 +7,9 @@ const server = http.createServer(function(req,res){
     if(req.url === '/' || req.url === '/home'|| req.url === '/index'){
         res.writeHead(200, {'Content-Type': 'text/html'});
         fs.createReadStream(__dirname + '/index.html').pipe(res);
+    }else if(req.url === '/favicon.ico'){
+        res.writeHead(200, {'Content-Type': 'image/x-icon'});
+        fs.createReadStream(__dirname + '/favicon.ico').pipe(res);
     }else if(req.url === '/api/animeList'){
         if(req.headers[process.env.HEADER] === process.env.HEADER_VALUE){
             res.writeHead(200, {'Content-Type': 'application/json'});
