@@ -17,7 +17,7 @@ const server = http.createServer(function(req,res){
         //}else{
         //    res.writeHead(403, {'Content-Type': 'text/html'});
         //    fs.createReadStream(__dirname + '/403.html').pipe(res);
-        }
+        //}
     }else{
         res.writeHead(404, {'Content-Type': 'text/html'});
         fs.createReadStream(__dirname + '/404.html').pipe(res);
