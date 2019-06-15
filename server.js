@@ -11,7 +11,7 @@ const server = http.createServer(function(req,res){
         res.writeHead(200, {'Content-Type': 'image/x-icon'});
         fs.createReadStream(__dirname + '/favicon.ico').pipe(res);
     }else if(req.url === '/api/animeList'){
-        if(req.headers[process.env.HEADER]{ //=== process.env.HEADER_VALUE){
+        if(req.headers[process.env.HEADER]){ //=== process.env.HEADER_VALUE){
             res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(JSON.stringify(jsonFile));
         }else{
