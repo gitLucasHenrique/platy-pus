@@ -14,9 +14,9 @@ const server = http.createServer(function(req,res){
         //if(req.headers[process.env.HEADER] === process.env.HEADER_VALUE){
             res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(JSON.stringify(jsonFile));
-        }else{
-            res.writeHead(403, {'Content-Type': 'text/html'});
-            fs.createReadStream(__dirname + '/403.html').pipe(res);
+        //}else{
+        //    res.writeHead(403, {'Content-Type': 'text/html'});
+        //    fs.createReadStream(__dirname + '/403.html').pipe(res);
         }
     }else{
         res.writeHead(404, {'Content-Type': 'text/html'});
