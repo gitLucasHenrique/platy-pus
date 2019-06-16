@@ -7,10 +7,6 @@ server.get('/' || '/home' || '/index', (req, res) => {
     res.sendFile(__dirname + '/index.html')
 });
 
-server.get('/' || '/home' || '/index', (req, res) => {
-    res.sendFile(__dirname + '/index.html')
-});
-
 server.get('/api/animeList', (req, res) => {
     res.sendFile(__dirname + '/assets/json/animeList.json');
 });
