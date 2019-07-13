@@ -16,7 +16,7 @@ server.get('/' || '/home' || '/index', (req, res) => {
 
 server.get('/teste', (req, res) => {
     console.log(jsonAnimes)
-    res.send({"aaaa":"aaaaa"})
+    res.send(JSON.parse(jsonAnimes))
 });
 
 server.get('/api/animeList', (req, res) => {
