@@ -15,6 +15,7 @@ server.get('/' || '/home' || '/index', (req, res) => {
 });
 
 server.get('/teste', (req, res) => {
+    console.log(jsonAnimes)
     res.send(jsonAnimes)
 });
 
