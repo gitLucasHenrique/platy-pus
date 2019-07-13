@@ -3,8 +3,19 @@ const fs = require('fs');
 const server = express();
 require('dotenv').config();
 
+let jsonAnimes = fs.readFile(__dirname + '/assets/json/animeList.json', function(err, data){
+    if(err) throw err;
+    console.log(data);
+})
+
+console.log(jsonAnimes);
+
 server.get('/' || '/home' || '/index', (req, res) => {
     res.sendFile(__dirname + '/index.html')
+});
+
+server.get('/teste', (req, res) => {
+    res.send(jsonAnimes)
 });
 
 server.get('/api/animeList', (req, res) => {
@@ -12,6 +23,7 @@ server.get('/api/animeList', (req, res) => {
 });
 
 server.get('*', (req, res) => {
+    res.send
     res.sendFile('/404.html', 404);
 });
 
