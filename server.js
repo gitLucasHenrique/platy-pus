@@ -16,7 +16,7 @@ server.get('/teste', (req, res) => {
     .then(json => res.send(json));
 });
 
-server.get('/getAnime', (req, res) => {
+server.get('/api/getAnime', (req, res) => {
     fetch(URL)
     .then(res => res.text())
     .then((text) => {
