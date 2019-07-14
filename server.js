@@ -2,21 +2,16 @@ const express = require('express');
 const fs = require('fs');
 const server = express();
 require('dotenv').config();
-
-let jsonAnimes = fs.readFile(__dirname + '/assets/json/animeList.json', function(err, data){
-    if(err) throw err;
-    console.log(data);
-})
-
-console.log(jsonAnimes);
+const fetch = require('node-fetch');
 
 server.get('/' || '/home' || '/index', (req, res) => {
     res.sendFile(__dirname + '/index.html')
 });
 
 server.get('/teste', (req, res) => {
-    console.log(jsonAnimes)
-    res.send(JSON.parse(jsonAnimes))
+    fetch('http://localhost:3000/api/animeList')
+    .then(res => res.json())
+    .then(json => res.send(json));
 });
 
 server.get('/api/animeList', (req, res) => {
@@ -24,8 +19,7 @@ server.get('/api/animeList', (req, res) => {
 });
 
 server.get('*', (req, res) => {
-    res.send
-    res.sendFile('/404.html', 404);
+    res.sendFile(__dirname + '/404.html', 404);
 });
 
 server.listen(process.env.PORT, () => console.log("listening on port ", process.env.PORT));

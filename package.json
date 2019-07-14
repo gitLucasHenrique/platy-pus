@@ -28,6 +28,8 @@
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "http": "0.0.0",
+    "json-stringify-safe": "^5.0.1",
+    "node-fetch": "^2.6.0",
     "nodemon": "^1.19.1"
   }
 }
