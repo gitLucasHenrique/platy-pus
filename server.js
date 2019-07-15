@@ -8,13 +8,13 @@ const URL = 'https://www.animestc.com/'
 const Cloudant = require('@cloudant/cloudant');
 const dbname = 'animes'
 const id = 'animes:list'
-var dbCred = require('./dbCredentials.json');
+//var dbCred = require('./dbCredentials.json');
 
 var cloudant = new Cloudant({
-    account: dbCred.username,
+    account: process.env.USERNAME,
     plugins: {
       iamauth: {
-        iamApiKey: dbCred.apikey
+        iamApiKey: process.env.APIKEY
       }
     }
 });
@@ -29,8 +29,8 @@ server.get('/api/animeListFromDB', (req, res) => {
           console.log(err);
           res.send({"output":[{"action":"get Anime List From DB","status":"failed"}]})
         } else {
-          console.log(data.animes); // { ok: true, id: 'rabbit', ...
-          res.send(data.animes)
+          console.log(data); // { ok: true, id: 'rabbit', ...
+          res.send(data)
         }
       })
 });
