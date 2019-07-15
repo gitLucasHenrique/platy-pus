@@ -10,10 +10,10 @@ const dbname = 'animes'
 const id = 'animes:list'
 
 var cloudant = new Cloudant({
-    account: process.env.username,
+    account: process.env.USERNAME,
     plugins: {
       iamauth: {
-        iamApiKey: process.env.apikey
+        iamApiKey: process.env.APIKEY
       }
     }
 });

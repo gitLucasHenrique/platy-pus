@@ -85,3 +85,4 @@ typings/
 
 #test scripts
 usAxios.js
+dbTest.js
