@@ -8,12 +8,13 @@ const URL = 'https://www.animestc.com/'
 const Cloudant = require('@cloudant/cloudant');
 const dbname = 'animes'
 const id = 'animes:list'
+var dbCred = require('./dbCredentials.json');
 
 var cloudant = new Cloudant({
-    account: process.env.USERNAME,
+    account: dbCred.username,
     plugins: {
       iamauth: {
-        iamApiKey: process.env.APIKEY
+        iamApiKey: dbCred.apikey
       }
     }
 });
@@ -44,7 +45,7 @@ server.get('/api/getAnimeList', (req, res) => {
                 console.log('failed to write file due: ', err);
             }
         });
-        cloudant.use(dbname).insert(strAnimeList, (err, data) => {
+        cloudant.use(dbname).insert(JSON.parse(strAnimeList), (err, data) => {
             if (err) {
               console.log(err);
             } else {
