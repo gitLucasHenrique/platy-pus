@@ -11,10 +11,10 @@ const id = 'animes:list'
 //var dbCred = require('./dbCredentials.json');
 
 var cloudant = new Cloudant({
-    account: process.env.USERNAME,
+    account: process.env.DB_USERNAME,
     plugins: {
       iamauth: {
-        iamApiKey: process.env.APIKEY
+        iamApiKey: process.env.DB_APIKEY
       }
     }
 });
