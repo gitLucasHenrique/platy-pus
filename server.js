@@ -20,7 +20,7 @@ server.get('/api/getAnime', (req, res) => {
     fetch(URL)
     .then(res => res.text())
     .then((text) => {
-        let strAnimeList = '{\"animes\": ' + JSON.stringify(workData(text)) + '}';
+        let strAnimeList = '{\"_id\":"animes:list", \"animes\": ' + JSON.stringify(workData(text)) + '}';
         fs.writeFile('./assets/json/animeList.json', strAnimeList, function(err){
             if(err){
                 console.log('failed to write file due: ', err);
