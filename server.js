@@ -68,7 +68,7 @@ server.get('*', (req, res) => {
     res.sendFile(__dirname + '/404.html', 404);
 });
 
-server.listen(process.env.PORT, () => console.log("listening on port ", process.env.PORT, process.env.DB_USERNAME));
+server.listen(process.env.PORT, () => console.log("listening on port ", process.env.PORT));
 
 function workData(data){
     let $ = cheerio.load(data);
