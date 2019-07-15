@@ -5,18 +5,36 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 const URL = 'https://www.animestc.com/'
+const Cloudant = require('@cloudant/cloudant');
+const dbname = 'animes'
+const id = 'animes:list'
+
+var cloudant = new Cloudant({
+    account: process.env.username,
+    plugins: {
+      iamauth: {
+        iamApiKey: process.env.apikey
+      }
+    }
+});
 
 server.get('/' || '/home' || '/index', (req, res) => {
     res.sendFile(__dirname + '/index.html')
 });
 
-server.get('/teste', (req, res) => {
-    fetch('http://localhost:3000/api/animeList')
-    .then(res => res.json())
-    .then(json => res.send(json));
+server.get('/api/animeListFromDB', (req, res) => {
+    cloudant.use(dbname).get(id, (err, data) => {
+        if (err) {
+          console.log(err);
+          res.send({"output":[{"action":"get Anime List From DB","status":"failed"}]})
+        } else {
+          console.log(data.animes); // { ok: true, id: 'rabbit', ...
+          res.send(data.animes)
+        }
+      })
 });
 
-server.get('/api/getAnime', (req, res) => {
+server.get('/api/getAnimeList', (req, res) => {
     fetch(URL)
     .then(res => res.text())
     .then((text) => {
@@ -24,6 +42,13 @@ server.get('/api/getAnime', (req, res) => {
         fs.writeFile('./assets/json/animeList.json', strAnimeList, function(err){
             if(err){
                 console.log('failed to write file due: ', err);
+            }
+        });
+        cloudant.use(dbname).insert(strAnimeList, (err, data) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(data); // { ok: true, id: 'rabbit', ...
             }
         });
         res.send({"output":[{"action":"generate Anime List","status":"success"}]})
@@ -65,4 +90,43 @@ function workData(data){
         animeList[i] = { name : animeNames[i], dayOTW : animeDaysOTW[i], img : animeImgs[i] };
     }
     return animeList;
+}
+
+function listDB(){
+    cloudant.db.list(function(err, body) {
+        body.forEach(function(db) {
+          console.log(db);
+        });
+      });
+}
+
+function createDB(dbname){
+    cloudant.db.create(dbname, function (err, data) {
+        if (err) {
+            console.log('Error:', err);
+        } else {
+            console.log('Data:', data);
+        }
+        db = cloudant.db.use(dbname);
+    });
+}
+
+function insertDoc(dbname,doc){
+    cloudant.use(dbname).insert(doc, (err, data) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(data); // { ok: true, id: 'rabbit', ...
+        }
+      });
+}
+
+function getDoc(dbname,id){
+    cloudant.use(dbname).get(id, (err, data) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(data.animes); // { ok: true, id: 'rabbit', ...
+        }
+      });
 }
