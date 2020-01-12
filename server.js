@@ -76,6 +76,9 @@ function workData(data){
     let animeNames = [];
     let animeDaysOTW = [];
     let animeImgs = [];
+    let animeHoraBR = [];
+    let animeHoraJP = [];
+    let animeReleaseDate = [];
     
     $('.atualizacoes-content').find('.anime-transmissao-nome').each(function(i, value){
         animeNames.push($('h4', this).text());
@@ -86,9 +89,25 @@ function workData(data){
     $('.atualizacoes-content').find('.transmissao-container').find('.anime-transmissao-container').find('img').each(function(i, value){
         animeImgs.push($(value, this).attr('data-src'));
     });
+    $('.atualizacoes-content').find('.transmissao-container').find('.transmissao-horario').each(function(i, value){
+      animeHoraBR.push($(value, this).attr('data-horariobr'));
+  });
+  $('.atualizacoes-content').find('.transmissao-container').find('.transmissao-horario').each(function(i, value){
+      animeHoraJP.push($(value, this).attr('data-horariojp'));
+      //console.log("valo da iteracao" + i + " " + $(value, this).attr('data-horariojp'))
+  });
+  $('.atualizacoes-content').find('.transmissao-container').find('.transmissao-horario').each(function(i, value){
+      if ($(value, this).attr('data-lancamento') === "0"){
+          console.log(animeReleaseDate)
+          animeReleaseDate.push("?")
+      }else{
+          animeReleaseDate.push($(value, this).attr('data-lancamento'));
+      }
+  });
 
     for ( i = 0; i < $('.atualizacoes-content').find('.transmissao-container').length; i++){
-        animeList[i] = { name : animeNames[i], dayOTW : animeDaysOTW[i], img : animeImgs[i] };
+      animeList[i] = { name : animeNames[i], dayOTW : animeDaysOTW[i], img : animeImgs[i],
+        transmiBR : animeHoraBR[i], transmiJP : animeHoraJP[i], animeReleaseDate : animeReleaseDate[i] };
     }
     return animeList;
 }
