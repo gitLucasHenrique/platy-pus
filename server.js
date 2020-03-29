@@ -174,7 +174,9 @@ server.get('/api/getAnimeListPuppeteer', (req, res) => {
     (async () => {
       const browser = await puppeteer.launch({
         args: [
-          '--start-maximized' // you can also use '--start-fullscreen'
+          //'--start-maximized' // you can also use '--start-fullscreen'
+          '--no-sandbox',
+          '--disable-setuid-sandbox'
         ], headless: true
       });
       const pagina1 = await browser.newPage();
