@@ -30,6 +30,17 @@ server.get('/' || '/home' || '/index', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 });
 
+server.post('/api/getUser', (req, res) => {
+  let animeDB = cloudant.db.use("users");
+  animeDB.get(req.body.id_user, (err, data) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(data);
+    }
+  })
+});
+
 server.post('/api/deleteUser', (req, res) => {
   let animeDB = cloudant.db.use("users");
   let queryUser = {
