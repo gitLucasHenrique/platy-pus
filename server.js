@@ -30,13 +30,28 @@ server.get('/' || '/home' || '/index', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 });
 
+server.post('/api/checkUserFav', (req, res) => {
+  let animeDB = cloudant.db.use("users");
+  animeDB.get(req.body.id_user, (err, data) => {
+    if (err) {
+      res.send(err);
+    } else {
+      let isFav = false;
+      data.animes.forEach(element => {
+        if (element.name == req.body.animeName) isFav = true;
+      });
+      res.send(isFav);
+    }
+  })
+});
+
 server.post('/api/getUser', (req, res) => {
   let animeDB = cloudant.db.use("users");
   animeDB.get(req.body.id_user, (err, data) => {
     if (err) {
       res.send(err);
     } else {
-      res.send(data);
+      res.send(data.animes);
     }
   })
 });
