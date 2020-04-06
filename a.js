@@ -21,10 +21,8 @@ let queryUser = {
 
 animeDB.get(id, (err, data) => {
     if (err) {
-        console.log(err);
+        res.send(err);
     } else {
-        data.animes.forEach(element => {
-            if (element.name == animeName) console.log("encontrado")
-        });
+        console.log({ "animes": data.animes });
     }
 })

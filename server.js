@@ -270,7 +270,7 @@ server.get('/api/getAnimeListPuppeteer', (req, res) => {
           result[i].anoLancamento = resultDetails[3]
           result[i].estudio = resultDetails[4]
           result[i].statusAtual = resultDetails[5]
-          result[i].sinopse = resultDetails[6]
+          result[i].sinopse = (resultDetails[7]) ? resultDetails[7] : resultDetails[6]
           await teste.close();
           i++;
         } catch (err) {
