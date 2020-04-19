@@ -196,21 +196,80 @@ server.get('/api/getAnimeList', (req, res) => {
 });
 
 server.get('/api/getAnimeListPuppeteer', (req, res) => {
-  function teste(url) {
+  function getAnimes(url) {
     (async () => {
-      const browser = await puppeteer.launch({
-        args: [
-          //'--start-maximized' // you can also use '--start-fullscreen'
-          '--no-sandbox',
-          '--disable-setuid-sandbox'
-        ], headless: true
-      });
-      const pagina1 = await browser.newPage();
-
-      await pagina1.setViewport({ width: 1366, height: 768 });
-      await pagina1.goto(url, { waitUntil: 'networkidle2', timeout: 0 });
-      const result = await pagina1.evaluate(() => {
-        let animesList = [];
+      const browser = await puppeteer.launch(
+        {
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--start-maximized',
+          ],
+          headless: true
+          //executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'
+        });
+      const page = await browser.newPage();
+      await page.setViewport({ width: 1366, height: 768 })
+      await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
+      const weekDays = await page.$$('div.datas > ul > li > a');
+      let idxAnimeDetails = 0
+      await weekDays[0].click()
+      const animesSegunda = await page.evaluate(() => {
+        function add12(hour) {
+          switch (hour.split(':')[0]) {
+            case '01':
+              return '13'
+            case '02':
+              return '14'
+            case '03':
+              return '15'
+            case '04':
+              return '16'
+            case '05':
+              return '17'
+            case '06':
+              return '18'
+            case '07':
+              return '19'
+            case '08':
+              return '20'
+            case '09':
+              return '21'
+            case '10':
+              return '22'
+            case '11':
+              return '23'
+            case '12':
+              return '00'
+            case '13':
+              return '01'
+            case '14':
+              return '02'
+            case '15':
+              return '03'
+            case '16':
+              return '04'
+            case '17':
+              return '05'
+            case '18':
+              return '06'
+            case '19':
+              return '07'
+            case '20':
+              return '08'
+            case '21':
+              return '09'
+            case '22':
+              return '10'
+            case '23':
+              return '11'
+            case '00':
+              return '12'
+            default:
+              return 'invalid';
+          }
+        }
+        let animes = [];
         let animesUrl = [];
         let animesNames = [];
         let animesDaysOTW = [];
@@ -218,69 +277,899 @@ server.get('/api/getAnimeListPuppeteer', (req, res) => {
         let animesHoraBR = [];
         let animesHoraJP = [];
         let animesReleaseDate = [];
-
-        document.querySelectorAll('div.transmissao-container > a')
-          .forEach(animeUrl => animesUrl.push(animeUrl.getAttribute('href')));
-        document.querySelectorAll('div.transmissao-container > a > div.anime-transmissao-container > div.anime-transmissao-nome > h4')
-          .forEach(animeName => animesNames.push(animeName.innerHTML));
-        document.querySelectorAll('div.atualizacoes-content div.transmissao-container')
-          .forEach(animeDayOTW => {
-            (animeDayOTW.getAttribute('data-semana') == "7") ?
-              animesDaysOTW.push("0") :
-              animesDaysOTW.push(animeDayOTW.getAttribute('data-semana'));
-          });
-        document.querySelectorAll('div.atualizacoes-content div.transmissao-container a div.anime-transmissao-container img')
+        //get all URL from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a')
+          .forEach(animeUrl => {
+            animesUrl.push(animeUrl.getAttribute('href'))
+            //get all dayOFW
+            animesDaysOTW.push('1')
+            //get all releaseDate
+            animesReleaseDate.push('??')
+          })
+        //get all names frm current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > figcaption')
+          .forEach(animeName => animesNames.push(animeName.innerHTML.trim()))
+        //get all Img from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > img')
           .forEach(animeImg => animesImgs.push(animeImg.getAttribute('data-src')))
-        document.querySelectorAll('div.transmissao-container > div.transmissao-horario')
-          .forEach(animeHoraBR => animesHoraBR.push(animeHoraBR.getAttribute('data-horariobr')));
-        document.querySelectorAll('div.transmissao-container > div.transmissao-horario')
-          .forEach(animeHoraJP => animesHoraJP.push(animeHoraJP.getAttribute('data-horariojp')));
-        document.querySelectorAll('div.transmissao-container > div.transmissao-horario')
-          .forEach(animeRealeaseDate => animesReleaseDate.push(animeRealeaseDate.getAttribute('data-lancamento')));
+        //get all horaBR
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeBR => animesHoraBR.push(animeBR.innerHTML))
+        //get all horaJP
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeJP => {
+            let hora = animeJP.innerHTML;
+            animesHoraJP.push(add12(hora) + ':' + hora.split(':')[1])
+          })
 
         for (let i = 0; i < animesUrl.length; i++) {
-          animesList[i] = {
-            url: animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
+          animes[i] = {
+            url: 'https://www.animestc.com' + animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
             transmiBR: animesHoraBR[i], transmiJP: animesHoraJP[i], animeReleaseDate: animesReleaseDate[i]
           };
         }
-        console.log(animesList.length);
-        return animesList;
+        return animes
       })
-      await pagina1.close();
-      let i = 0;
-      //console.log(result)
-      while (i < result.length) {
+      while (idxAnimeDetails < animesSegunda.length) {
         try {
-          let teste = await browser.newPage();
-          await teste.goto(result[i].url, { waitUntil: 'networkidle2', timeout: 0 });
-          const resultDetails = await teste.evaluate(() => {
+          let paginaDetails = await browser.newPage();
+          await paginaDetails.goto(animesSegunda[idxAnimeDetails].url, { waitUntil: 'networkidle2', timeout: 0 });
+          const resultDetails = await paginaDetails.evaluate(() => {
             let animeDetails = [];
-            document.querySelectorAll('div.pag-anime-dados-direita > ul > li')
-              .forEach(ele => animeDetails.push(ele.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '')))
+            let classificacao = document.querySelector('div.tooltip-container > article > aside > figure.centering-container > figcaption').innerText
+            document.querySelectorAll('div.series-data-entry').forEach(content => {
+              (animeDetails.length == 0) ?
+                animeDetails.push(classificacao, content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+                :
+                animeDetails.push(content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+            })
             return animeDetails;
           })
-          result[i].numeroEpisodios = resultDetails[0]
-          result[i].generos = resultDetails[1]
-          result[i].classificacao = resultDetails[2].toLowerCase().includes("livre")
+          //console.log(resultDetails);
+          animesSegunda[idxAnimeDetails].classificacao = resultDetails[0].toLowerCase().includes("livre")
             ? "L"
-            : resultDetails[2].includes("18")
+            : resultDetails[0].includes("18")
               ? "18"
-              : resultDetails[2].split(" ")[0]
-          result[i].anoLancamento = resultDetails[3]
-          result[i].estudio = resultDetails[4]
-          result[i].statusAtual = resultDetails[5]
-          result[i].sinopse = (resultDetails[7]) ? resultDetails[7] : resultDetails[6]
-          await teste.close();
-          i++;
-        } catch (err) {
-          console.error(err);
+              : resultDetails[0].split(" ")[0];
+          animesSegunda[idxAnimeDetails].statusAtual = resultDetails[1];
+          animesSegunda[idxAnimeDetails].numeroEpisodios = resultDetails[2];
+          animesSegunda[idxAnimeDetails].anoLancamento = resultDetails[3];
+          animesSegunda[idxAnimeDetails].estudio = resultDetails[4];
+          animesSegunda[idxAnimeDetails].generos = resultDetails[5];
+          animesSegunda[idxAnimeDetails].sinopse = resultDetails[6];
+          await paginaDetails.close();
+          idxAnimeDetails++;
+        } catch (error) {
+          console.log(error);
         }
       }
-      addAnimesToDB({ _id: "animes:list", animes: result }, myDB)
+      idxAnimeDetails = 0;
+      await weekDays[1].click()
+      const animesTerca = await page.evaluate(() => {
+        function add12(hour) {
+          switch (hour.split(':')[0]) {
+            case '01':
+              return '13'
+            case '02':
+              return '14'
+            case '03':
+              return '15'
+            case '04':
+              return '16'
+            case '05':
+              return '17'
+            case '06':
+              return '18'
+            case '07':
+              return '19'
+            case '08':
+              return '20'
+            case '09':
+              return '21'
+            case '10':
+              return '22'
+            case '11':
+              return '23'
+            case '12':
+              return '00'
+            case '13':
+              return '01'
+            case '14':
+              return '02'
+            case '15':
+              return '03'
+            case '16':
+              return '04'
+            case '17':
+              return '05'
+            case '18':
+              return '06'
+            case '19':
+              return '07'
+            case '20':
+              return '08'
+            case '21':
+              return '09'
+            case '22':
+              return '10'
+            case '23':
+              return '11'
+            case '00':
+              return '12'
+            default:
+              return 'invalid';
+          }
+        }
+        let animes = [];
+        let animesUrl = [];
+        let animesNames = [];
+        let animesDaysOTW = [];
+        let animesImgs = [];
+        let animesHoraBR = [];
+        let animesHoraJP = [];
+        let animesReleaseDate = [];
+        //get all URL from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a')
+          .forEach(animeUrl => {
+            animesUrl.push(animeUrl.getAttribute('href'))
+            //get all dayOFW
+            animesDaysOTW.push('2')
+            //get all releaseDate
+            animesReleaseDate.push('??')
+          })
+        //get all names frm current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > figcaption')
+          .forEach(animeName => animesNames.push(animeName.innerHTML.trim()))
+        //get all Img from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > img')
+          .forEach(animeImg => animesImgs.push(animeImg.getAttribute('data-src')))
+        //get all horaBR
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeBR => animesHoraBR.push(animeBR.innerHTML))
+        //get all horaJP
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeJP => {
+            let hora = animeJP.innerHTML;
+            animesHoraJP.push(add12(hora) + ':' + hora.split(':')[1])
+          })
+
+        for (let i = 0; i < animesUrl.length; i++) {
+          animes[i] = {
+            url: 'https://www.animestc.com' + animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
+            transmiBR: animesHoraBR[i], transmiJP: animesHoraJP[i], animeReleaseDate: animesReleaseDate[i]
+          };
+        }
+        return animes
+      })
+      while (idxAnimeDetails < animesTerca.length) {
+        try {
+          let paginaDetails = await browser.newPage();
+          await paginaDetails.goto(animesTerca[idxAnimeDetails].url, { waitUntil: 'networkidle2', timeout: 0 });
+          const resultDetails = await paginaDetails.evaluate(() => {
+            let animeDetails = [];
+            let classificacao = document.querySelector('div.tooltip-container > article > aside > figure.centering-container > figcaption').innerText
+            document.querySelectorAll('div.series-data-entry').forEach(content => {
+              (animeDetails.length == 0) ?
+                animeDetails.push(classificacao, content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+                :
+                animeDetails.push(content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+            })
+            return animeDetails;
+          })
+          //console.log(resultDetails);
+          animesTerca[idxAnimeDetails].classificacao = resultDetails[0].toLowerCase().includes("livre")
+            ? "L"
+            : resultDetails[0].includes("18")
+              ? "18"
+              : resultDetails[0].split(" ")[0];
+          animesTerca[idxAnimeDetails].statusAtual = resultDetails[1];
+          animesTerca[idxAnimeDetails].numeroEpisodios = resultDetails[2];
+          animesTerca[idxAnimeDetails].anoLancamento = resultDetails[3];
+          animesTerca[idxAnimeDetails].estudio = resultDetails[4];
+          animesTerca[idxAnimeDetails].generos = resultDetails[5];
+          animesTerca[idxAnimeDetails].sinopse = resultDetails[6];
+          await paginaDetails.close();
+          idxAnimeDetails++;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      idxAnimeDetails = 0;
+      await weekDays[2].click()
+      const animesQuarta = await page.evaluate(() => {
+        function add12(hour) {
+          switch (hour.split(':')[0]) {
+            case '01':
+              return '13'
+            case '02':
+              return '14'
+            case '03':
+              return '15'
+            case '04':
+              return '16'
+            case '05':
+              return '17'
+            case '06':
+              return '18'
+            case '07':
+              return '19'
+            case '08':
+              return '20'
+            case '09':
+              return '21'
+            case '10':
+              return '22'
+            case '11':
+              return '23'
+            case '12':
+              return '00'
+            case '13':
+              return '01'
+            case '14':
+              return '02'
+            case '15':
+              return '03'
+            case '16':
+              return '04'
+            case '17':
+              return '05'
+            case '18':
+              return '06'
+            case '19':
+              return '07'
+            case '20':
+              return '08'
+            case '21':
+              return '09'
+            case '22':
+              return '10'
+            case '23':
+              return '11'
+            case '00':
+              return '12'
+            default:
+              return 'invalid';
+          }
+        }
+        let animes = [];
+        let animesUrl = [];
+        let animesNames = [];
+        let animesDaysOTW = [];
+        let animesImgs = [];
+        let animesHoraBR = [];
+        let animesHoraJP = [];
+        let animesReleaseDate = [];
+        //get all URL from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a')
+          .forEach(animeUrl => {
+            animesUrl.push(animeUrl.getAttribute('href'))
+            //get all dayOFW
+            animesDaysOTW.push('3')
+            //get all releaseDate
+            animesReleaseDate.push('??')
+          })
+        //get all names frm current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > figcaption')
+          .forEach(animeName => animesNames.push(animeName.innerHTML.trim()))
+        //get all Img from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > img')
+          .forEach(animeImg => animesImgs.push(animeImg.getAttribute('data-src')))
+        //get all horaBR
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeBR => animesHoraBR.push(animeBR.innerHTML))
+        //get all horaJP
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeJP => {
+            let hora = animeJP.innerHTML;
+            animesHoraJP.push(add12(hora) + ':' + hora.split(':')[1])
+          })
+
+        for (let i = 0; i < animesUrl.length; i++) {
+          animes[i] = {
+            url: 'https://www.animestc.com' + animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
+            transmiBR: animesHoraBR[i], transmiJP: animesHoraJP[i], animeReleaseDate: animesReleaseDate[i]
+          };
+        }
+        return animes
+      })
+      while (idxAnimeDetails < animesQuarta.length) {
+        try {
+          let paginaDetails = await browser.newPage();
+          await paginaDetails.goto(animesQuarta[idxAnimeDetails].url, { waitUntil: 'networkidle2', timeout: 0 });
+          const resultDetails = await paginaDetails.evaluate(() => {
+            let animeDetails = [];
+            let classificacao = document.querySelector('div.tooltip-container > article > aside > figure.centering-container > figcaption').innerText
+            document.querySelectorAll('div.series-data-entry').forEach(content => {
+              (animeDetails.length == 0) ?
+                animeDetails.push(classificacao, content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+                :
+                animeDetails.push(content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+            })
+            return animeDetails;
+          })
+          //console.log(resultDetails);
+          animesQuarta[idxAnimeDetails].classificacao = resultDetails[0].toLowerCase().includes("livre")
+            ? "L"
+            : resultDetails[0].includes("18")
+              ? "18"
+              : resultDetails[0].split(" ")[0];
+          animesQuarta[idxAnimeDetails].statusAtual = resultDetails[1];
+          animesQuarta[idxAnimeDetails].numeroEpisodios = resultDetails[2];
+          animesQuarta[idxAnimeDetails].anoLancamento = resultDetails[3];
+          animesQuarta[idxAnimeDetails].estudio = resultDetails[4];
+          animesQuarta[idxAnimeDetails].generos = resultDetails[5];
+          animesQuarta[idxAnimeDetails].sinopse = resultDetails[6];
+          await paginaDetails.close();
+          idxAnimeDetails++;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      idxAnimeDetails = 0;
+      await weekDays[3].click()
+      const animesQuinta = await page.evaluate(() => {
+        function add12(hour) {
+          switch (hour.split(':')[0]) {
+            case '01':
+              return '13'
+            case '02':
+              return '14'
+            case '03':
+              return '15'
+            case '04':
+              return '16'
+            case '05':
+              return '17'
+            case '06':
+              return '18'
+            case '07':
+              return '19'
+            case '08':
+              return '20'
+            case '09':
+              return '21'
+            case '10':
+              return '22'
+            case '11':
+              return '23'
+            case '12':
+              return '00'
+            case '13':
+              return '01'
+            case '14':
+              return '02'
+            case '15':
+              return '03'
+            case '16':
+              return '04'
+            case '17':
+              return '05'
+            case '18':
+              return '06'
+            case '19':
+              return '07'
+            case '20':
+              return '08'
+            case '21':
+              return '09'
+            case '22':
+              return '10'
+            case '23':
+              return '11'
+            case '00':
+              return '12'
+            default:
+              return 'invalid';
+          }
+        }
+        let animes = [];
+        let animesUrl = [];
+        let animesNames = [];
+        let animesDaysOTW = [];
+        let animesImgs = [];
+        let animesHoraBR = [];
+        let animesHoraJP = [];
+        let animesReleaseDate = [];
+        //get all URL from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a')
+          .forEach(animeUrl => {
+            animesUrl.push(animeUrl.getAttribute('href'))
+            //get all dayOFW
+            animesDaysOTW.push('4')
+            //get all releaseDate
+            animesReleaseDate.push('??')
+          })
+        //get all names frm current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > figcaption')
+          .forEach(animeName => animesNames.push(animeName.innerHTML.trim()))
+        //get all Img from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > img')
+          .forEach(animeImg => animesImgs.push(animeImg.getAttribute('data-src')))
+        //get all horaBR
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeBR => animesHoraBR.push(animeBR.innerHTML))
+        //get all horaJP
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeJP => {
+            let hora = animeJP.innerHTML;
+            animesHoraJP.push(add12(hora) + ':' + hora.split(':')[1])
+          })
+
+        for (let i = 0; i < animesUrl.length; i++) {
+          animes[i] = {
+            url: 'https://www.animestc.com' + animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
+            transmiBR: animesHoraBR[i], transmiJP: animesHoraJP[i], animeReleaseDate: animesReleaseDate[i]
+          };
+        }
+        return animes
+      })
+      while (idxAnimeDetails < animesQuinta.length) {
+        try {
+          let paginaDetails = await browser.newPage();
+          await paginaDetails.goto(animesQuinta[idxAnimeDetails].url, { waitUntil: 'networkidle2', timeout: 0 });
+          const resultDetails = await paginaDetails.evaluate(() => {
+            let animeDetails = [];
+            let classificacao = document.querySelector('div.tooltip-container > article > aside > figure.centering-container > figcaption').innerText
+            document.querySelectorAll('div.series-data-entry').forEach(content => {
+              (animeDetails.length == 0) ?
+                animeDetails.push(classificacao, content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+                :
+                animeDetails.push(content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+            })
+            return animeDetails;
+          })
+          //console.log(resultDetails);
+          animesQuinta[idxAnimeDetails].classificacao = resultDetails[0].toLowerCase().includes("livre")
+            ? "L"
+            : resultDetails[0].includes("18")
+              ? "18"
+              : resultDetails[0].split(" ")[0];
+          animesQuinta[idxAnimeDetails].statusAtual = resultDetails[1];
+          animesQuinta[idxAnimeDetails].numeroEpisodios = resultDetails[2];
+          animesQuinta[idxAnimeDetails].anoLancamento = resultDetails[3];
+          animesQuinta[idxAnimeDetails].estudio = resultDetails[4];
+          animesQuinta[idxAnimeDetails].generos = resultDetails[5];
+          animesQuinta[idxAnimeDetails].sinopse = resultDetails[6];
+          await paginaDetails.close();
+          idxAnimeDetails++;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      idxAnimeDetails = 0;
+      await weekDays[4].click()
+      const animesSexta = await page.evaluate(() => {
+        function add12(hour) {
+          switch (hour.split(':')[0]) {
+            case '01':
+              return '13'
+            case '02':
+              return '14'
+            case '03':
+              return '15'
+            case '04':
+              return '16'
+            case '05':
+              return '17'
+            case '06':
+              return '18'
+            case '07':
+              return '19'
+            case '08':
+              return '20'
+            case '09':
+              return '21'
+            case '10':
+              return '22'
+            case '11':
+              return '23'
+            case '12':
+              return '00'
+            case '13':
+              return '01'
+            case '14':
+              return '02'
+            case '15':
+              return '03'
+            case '16':
+              return '04'
+            case '17':
+              return '05'
+            case '18':
+              return '06'
+            case '19':
+              return '07'
+            case '20':
+              return '08'
+            case '21':
+              return '09'
+            case '22':
+              return '10'
+            case '23':
+              return '11'
+            case '00':
+              return '12'
+            default:
+              return 'invalid';
+          }
+        }
+        let animes = [];
+        let animesUrl = [];
+        let animesNames = [];
+        let animesDaysOTW = [];
+        let animesImgs = [];
+        let animesHoraBR = [];
+        let animesHoraJP = [];
+        let animesReleaseDate = [];
+        //get all URL from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a')
+          .forEach(animeUrl => {
+            animesUrl.push(animeUrl.getAttribute('href'))
+            //get all dayOFW
+            animesDaysOTW.push('5')
+            //get all releaseDate
+            animesReleaseDate.push('??')
+          })
+        //get all names frm current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > figcaption')
+          .forEach(animeName => animesNames.push(animeName.innerHTML.trim()))
+        //get all Img from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > img')
+          .forEach(animeImg => animesImgs.push(animeImg.getAttribute('data-src')))
+        //get all horaBR
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeBR => animesHoraBR.push(animeBR.innerHTML))
+        //get all horaJP
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeJP => {
+            let hora = animeJP.innerHTML;
+            animesHoraJP.push(add12(hora) + ':' + hora.split(':')[1])
+          })
+
+        for (let i = 0; i < animesUrl.length; i++) {
+          animes[i] = {
+            url: 'https://www.animestc.com' + animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
+            transmiBR: animesHoraBR[i], transmiJP: animesHoraJP[i], animeReleaseDate: animesReleaseDate[i]
+          };
+        }
+        return animes
+      })
+      while (idxAnimeDetails < animesSexta.length) {
+        try {
+          let paginaDetails = await browser.newPage();
+          await paginaDetails.goto(animesSexta[idxAnimeDetails].url, { waitUntil: 'networkidle2', timeout: 0 });
+          const resultDetails = await paginaDetails.evaluate(() => {
+            let animeDetails = [];
+            let classificacao = document.querySelector('div.tooltip-container > article > aside > figure.centering-container > figcaption').innerText
+            document.querySelectorAll('div.series-data-entry').forEach(content => {
+              (animeDetails.length == 0) ?
+                animeDetails.push(classificacao, content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+                :
+                animeDetails.push(content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+            })
+            return animeDetails;
+          })
+          //console.log(resultDetails);
+          animesSexta[idxAnimeDetails].classificacao = resultDetails[0].toLowerCase().includes("livre")
+            ? "L"
+            : resultDetails[0].includes("18")
+              ? "18"
+              : resultDetails[0].split(" ")[0];
+          animesSexta[idxAnimeDetails].statusAtual = resultDetails[1];
+          animesSexta[idxAnimeDetails].numeroEpisodios = resultDetails[2];
+          animesSexta[idxAnimeDetails].anoLancamento = resultDetails[3];
+          animesSexta[idxAnimeDetails].estudio = resultDetails[4];
+          animesSexta[idxAnimeDetails].generos = resultDetails[5];
+          animesSexta[idxAnimeDetails].sinopse = resultDetails[6];
+          await paginaDetails.close();
+          idxAnimeDetails++;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      idxAnimeDetails = 0;
+      await weekDays[5].click()
+      const animesSabado = await page.evaluate(() => {
+        function add12(hour) {
+          switch (hour.split(':')[0]) {
+            case '01':
+              return '13'
+            case '02':
+              return '14'
+            case '03':
+              return '15'
+            case '04':
+              return '16'
+            case '05':
+              return '17'
+            case '06':
+              return '18'
+            case '07':
+              return '19'
+            case '08':
+              return '20'
+            case '09':
+              return '21'
+            case '10':
+              return '22'
+            case '11':
+              return '23'
+            case '12':
+              return '00'
+            case '13':
+              return '01'
+            case '14':
+              return '02'
+            case '15':
+              return '03'
+            case '16':
+              return '04'
+            case '17':
+              return '05'
+            case '18':
+              return '06'
+            case '19':
+              return '07'
+            case '20':
+              return '08'
+            case '21':
+              return '09'
+            case '22':
+              return '10'
+            case '23':
+              return '11'
+            case '00':
+              return '12'
+            default:
+              return 'invalid';
+          }
+        }
+        let animes = [];
+        let animesUrl = [];
+        let animesNames = [];
+        let animesDaysOTW = [];
+        let animesImgs = [];
+        let animesHoraBR = [];
+        let animesHoraJP = [];
+        let animesReleaseDate = [];
+        //get all URL from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a')
+          .forEach(animeUrl => {
+            animesUrl.push(animeUrl.getAttribute('href'))
+            //get all dayOFW
+            animesDaysOTW.push('6')
+            //get all releaseDate
+            animesReleaseDate.push('??')
+          })
+        //get all names frm current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > figcaption')
+          .forEach(animeName => animesNames.push(animeName.innerHTML.trim()))
+        //get all Img from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > img')
+          .forEach(animeImg => animesImgs.push(animeImg.getAttribute('data-src')))
+        //get all horaBR
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeBR => animesHoraBR.push(animeBR.innerHTML))
+        //get all horaJP
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeJP => {
+            let hora = animeJP.innerHTML;
+            animesHoraJP.push(add12(hora) + ':' + hora.split(':')[1])
+          })
+
+        for (let i = 0; i < animesUrl.length; i++) {
+          animes[i] = {
+            url: 'https://www.animestc.com' + animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
+            transmiBR: animesHoraBR[i], transmiJP: animesHoraJP[i], animeReleaseDate: animesReleaseDate[i]
+          };
+        }
+        return animes
+      })
+      while (idxAnimeDetails < animesSabado.length) {
+        try {
+          let paginaDetails = await browser.newPage();
+          await paginaDetails.goto(animesSabado[idxAnimeDetails].url, { waitUntil: 'networkidle2', timeout: 0 });
+          const resultDetails = await paginaDetails.evaluate(() => {
+            let animeDetails = [];
+            let classificacao = document.querySelector('div.tooltip-container > article > aside > figure.centering-container > figcaption').innerText
+            document.querySelectorAll('div.series-data-entry').forEach(content => {
+              (animeDetails.length == 0) ?
+                animeDetails.push(classificacao, content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+                :
+                animeDetails.push(content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+            })
+            return animeDetails;
+          })
+          //console.log(resultDetails);
+          animesSabado[idxAnimeDetails].classificacao = resultDetails[0].toLowerCase().includes("livre")
+            ? "L"
+            : resultDetails[0].includes("18")
+              ? "18"
+              : resultDetails[0].split(" ")[0];
+          animesSabado[idxAnimeDetails].statusAtual = resultDetails[1];
+          animesSabado[idxAnimeDetails].numeroEpisodios = resultDetails[2];
+          animesSabado[idxAnimeDetails].anoLancamento = resultDetails[3];
+          animesSabado[idxAnimeDetails].estudio = resultDetails[4];
+          animesSabado[idxAnimeDetails].generos = resultDetails[5];
+          animesSabado[idxAnimeDetails].sinopse = resultDetails[6];
+          await paginaDetails.close();
+          idxAnimeDetails++;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      idxAnimeDetails = 0;
+      await weekDays[6].click()
+      const animesDomingo = await page.evaluate(() => {
+        function add12(hour) {
+          switch (hour.split(':')[0]) {
+            case '01':
+              return '13'
+            case '02':
+              return '14'
+            case '03':
+              return '15'
+            case '04':
+              return '16'
+            case '05':
+              return '17'
+            case '06':
+              return '18'
+            case '07':
+              return '19'
+            case '08':
+              return '20'
+            case '09':
+              return '21'
+            case '10':
+              return '22'
+            case '11':
+              return '23'
+            case '12':
+              return '00'
+            case '13':
+              return '01'
+            case '14':
+              return '02'
+            case '15':
+              return '03'
+            case '16':
+              return '04'
+            case '17':
+              return '05'
+            case '18':
+              return '06'
+            case '19':
+              return '07'
+            case '20':
+              return '08'
+            case '21':
+              return '09'
+            case '22':
+              return '10'
+            case '23':
+              return '11'
+            case '00':
+              return '12'
+            default:
+              return 'invalid';
+          }
+        }
+        let animes = [];
+        let animesUrl = [];
+        let animesNames = [];
+        let animesDaysOTW = [];
+        let animesImgs = [];
+        let animesHoraBR = [];
+        let animesHoraJP = [];
+        let animesReleaseDate = [];
+        //get all URL from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a')
+          .forEach(animeUrl => {
+            animesUrl.push(animeUrl.getAttribute('href'))
+            //get all dayOFW
+            animesDaysOTW.push('0')
+            //get all releaseDate
+            animesReleaseDate.push('??')
+          })
+        //get all names frm current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > figcaption')
+          .forEach(animeName => animesNames.push(animeName.innerHTML.trim()))
+        //get all Img from current day
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > figure > img')
+          .forEach(animeImg => animesImgs.push(animeImg.getAttribute('data-src')))
+        //get all horaBR
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeBR => animesHoraBR.push(animeBR.innerHTML))
+        //get all horaJP
+        document.querySelectorAll('div.__panel.__slide.y-hidden > div.anime-entry-container > a > article > header > span')
+          .forEach(animeJP => {
+            let hora = animeJP.innerHTML;
+            animesHoraJP.push(add12(hora) + ':' + hora.split(':')[1])
+          })
+
+        for (let i = 0; i < animesUrl.length; i++) {
+          animes[i] = {
+            url: 'https://www.animestc.com' + animesUrl[i], name: animesNames[i], dayOTW: animesDaysOTW[i], img: animesImgs[i],
+            transmiBR: animesHoraBR[i], transmiJP: animesHoraJP[i], animeReleaseDate: animesReleaseDate[i]
+          };
+        }
+        return animes
+      })
+      while (idxAnimeDetails < animesDomingo.length) {
+        try {
+          let paginaDetails = await browser.newPage();
+          await paginaDetails.goto(animesDomingo[idxAnimeDetails].url, { waitUntil: 'networkidle2', timeout: 0 });
+          const resultDetails = await paginaDetails.evaluate(() => {
+            let animeDetails = [];
+            let classificacao = document.querySelector('div.tooltip-container > article > aside > figure.centering-container > figcaption').innerText
+            document.querySelectorAll('div.series-data-entry').forEach(content => {
+              (animeDetails.length == 0) ?
+                animeDetails.push(classificacao, content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+                :
+                animeDetails.push(content.textContent.split(/[a-z]: /)[1].replace(/(\r\n|\n|\r)/gm, '').trim())
+            })
+            return animeDetails;
+          })
+          //console.log(resultDetails);
+          animesDomingo[idxAnimeDetails].classificacao = resultDetails[0].toLowerCase().includes("livre")
+            ? "L"
+            : resultDetails[0].includes("18")
+              ? "18"
+              : resultDetails[0].split(" ")[0];
+          animesDomingo[idxAnimeDetails].statusAtual = resultDetails[1];
+          animesDomingo[idxAnimeDetails].numeroEpisodios = resultDetails[2];
+          animesDomingo[idxAnimeDetails].anoLancamento = resultDetails[3];
+          animesDomingo[idxAnimeDetails].estudio = resultDetails[4];
+          animesDomingo[idxAnimeDetails].generos = resultDetails[5];
+          animesDomingo[idxAnimeDetails].sinopse = resultDetails[6];
+          await paginaDetails.close();
+          idxAnimeDetails++;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      idxAnimeDetails = 0;
+      let animeList = [];
+      let animeListIdx = 0;
+      while (animeListIdx < animesSegunda.length) {
+        animeList.push(animesSegunda[animeListIdx])
+        animeListIdx++
+      }
+      animeListIdx = 0
+      while (animeListIdx < animesTerca.length) {
+        animeList.push(animesTerca[animeListIdx])
+        animeListIdx++
+      }
+      animeListIdx = 0
+      while (animeListIdx < animesQuarta.length) {
+        animeList.push(animesQuarta[animeListIdx])
+        animeListIdx++
+      }
+      animeListIdx = 0
+      while (animeListIdx < animesQuinta.length) {
+        animeList.push(animesQuinta[animeListIdx])
+        animeListIdx++
+      }
+      animeListIdx = 0
+      while (animeListIdx < animesSexta.length) {
+        animeList.push(animesSexta[animeListIdx])
+        animeListIdx++
+      }
+      animeListIdx = 0
+      while (animeListIdx < animesSabado.length) {
+        animeList.push(animesSabado[animeListIdx])
+        animeListIdx++
+      }
+      animeListIdx = 0
+      while (animeListIdx < animesDomingo.length) {
+        animeList.push(animesDomingo[animeListIdx])
+        animeListIdx++
+      }
+      addAnimesToDB({ _id: "animes:list", animes: animeList }, myDB)
       await browser.close();
-    })();
-  }
+    })()
+  };
 
   function addAnimesToDB(animes, db) {
     let query = {
@@ -312,9 +1201,12 @@ server.get('/api/getAnimeListPuppeteer', (req, res) => {
     });
 
   }
-
-  teste(URL);
-  res.send("success!")
+  if (req.headers['secret-one'] == 'platypus') {
+    getAnimes(URL)
+    res.send({ action: 'generating anime list puppeteer', status: 'success' })
+  } else {
+    res.send({ action: 'generate list puppeteer', status: 'failed' })
+  }
 });
 
 server.get('/api/animeList', (req, res) => {
