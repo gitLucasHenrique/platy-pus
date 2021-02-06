@@ -175,6 +175,9 @@ server.get('/api/getAnimeListPuppeteer', (req, res) => {
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--start-maximized',
+            "--incognito",
+            "--single-process",
+            "--no-zygote"
           ],
           headless: true
           //executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'
