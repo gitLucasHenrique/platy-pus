@@ -23,7 +23,7 @@
   "homepage": "https://github.com/gitLucasHenrique/platy-pus#readme",
   "dependencies": {
     "@cloudant/cloudant": "^4.1.1",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.3",
     "cloudant": "^1.10.0-NOTICE",
     "dotenv": "^8.0.0",
@@ -32,7 +32,7 @@
     "fs": "0.0.1-security",
     "http": "0.0.0",
     "json-stringify-safe": "^5.0.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "nodemon": "^2.0.2",
     "puppeteer": "^2.1.1"
   }
